@@ -12,17 +12,22 @@ from parse import parse_and_calculate_worker_metrics
 
 perf_folder = os.path.join('.', 'perf_data')
 
-if not os.path.exists(perf_folder):
+if not os.path.exists(os.path.join(perf_folder, "binary")):
     os.makedirs(os.path.join(perf_folder, "binary"), exist_ok=True)
+
+if not os.path.exists(os.path.join(perf_folder, "logs")):
     os.makedirs(os.path.join(perf_folder, "logs"), exist_ok=True)
 
 # --- 1. Experiment Configuration ---
-CPU_CONFIGS = [1, 2, 4]
-IO_CONFIGS = [0, 4, 8]
-MEM_CONFIGS = [0, 4, 12]
-NICE_VALUES = [-5, 0, 10]
-MUTEX_VALUES = [0, 4, 8]
-DURATION = 1                   # CRITICAL CHANGE: Reduced duration to 5 seconds
+# CPU_CONFIGS = [1, 2, 4]
+# IO_CONFIGS = [0, 4, 8]
+# MEM_CONFIGS = [0, 4, 8]
+# MUTEX_VALUES = [0, 4, 8]
+
+CPU_CONFIGS = [4]
+IO_CONFIGS = [2]
+MEM_CONFIGS = [0]
+DURATION = 1                  # CRITICAL CHANGE: Reduced duration to 2 seconds
 
 # Fixed parameter for memory runs to ensure swap churn (since we removed its variance)
 FIXED_VM_WORKERS = 4
@@ -37,27 +42,23 @@ STOP_EVENT = threading.Event()
 # --- 2. Stressor Control Function ---
 # --- 2. Stressor Control Function (Updated) ---
 # --- 2. Stressor Control Function (CRITICAL UPDATE FOR SWAP) ---
-def start_stressor(cpu_workers, io_workers, mem_load, nice_value, duration, experiment_id):
+def start_stressor(cpu_workers, io_workers, mem_load, duration, experiment_id):
     """
     Starts stress-ng, now including a fixed, high memory stress (e.g., 5GB)
     to guarantee swap pressure, independent of io_workers.
     """
-    # The number of VM workers doesn't need to change much, we still use io_workers
-    vm_workers = io_workers 
-    
     # CRITICAL CHANGE: Set a fixed, large memory request (e.g., 5GB).
     # This value MUST be larger than your physical RAM to force swapping.
     # Adjust '5G' based on your physical RAM size (e.g., if you have 8GB RAM, use '10G').
-    vm_workers = 8 if mem_load > 0 else 0
+    vm_workers = FIXED_VM_WORKERS if mem_load > 0 else 0
     vm_bytes = f'{mem_load}G'
     command_str = f"sudo perf record -e sched:sched_process_fork,sched:sched_process_exit,sched:sched_switch \
     -a -o {os.path.join(perf_folder, "binary", f'perf.data.{experiment_id}')} -- "
 
     command = command_str.split() + [
-        "nice", "-n", str(nice_value), 
         "stress-ng",
         f"--cpu", str(cpu_workers),
-        "--cpu-method", "matrixprod",
+        "--cpu-method", "loop",
         f"--io", str(io_workers),
     ]
 
@@ -155,17 +156,17 @@ def metric_monitor(stress_pid, experiment_id, interval=0.5):
 def run_feature_generation_suite(scheduler:str):
     local_summary_df = pd.DataFrame()
     # Hidden Variables to generate workload variety
-    all_experiments = list(itertools.product(CPU_CONFIGS, IO_CONFIGS, NICE_VALUES, MEM_CONFIGS))
+    all_experiments = list(itertools.product(CPU_CONFIGS, IO_CONFIGS, MEM_CONFIGS))
     
-    for i, (cpu, io, nice, mem_load) in enumerate(all_experiments):
+    for i, (cpu, io, mem_load) in enumerate(all_experiments):
         exp_id = f"EXP_{i:02d}_{random.randint(1000, 9999)}"
-        print(f"\n--- Running {exp_id} (CPU={cpu}, IO={io}, Nice={nice}, Mem={mem_load}G) ---")
+        print(f"\n--- Running {exp_id} (CPU={cpu}, IO={io}, Mem={mem_load}G) ---")
         
         # Reset monitoring state
         STOP_EVENT.clear()
         
         # Start the stressor
-        stress_proc = start_stressor(cpu, io, mem_load, nice, DURATION, exp_id)
+        stress_proc = start_stressor(cpu, io, mem_load, DURATION, exp_id)
         
         # Start the monitoring thread
         monitor_thread = threading.Thread(target=metric_monitor, args=(stress_proc.pid, exp_id))
@@ -198,7 +199,6 @@ def run_feature_generation_suite(scheduler:str):
             'scheduler': scheduler,
             'cpu': cpu,
             'io': io,
-            'nice': nice,
             'mem_load': mem_load,
         }
         
@@ -236,7 +236,7 @@ def run_feature_generation_suite(scheduler:str):
 features_df = run_feature_generation_suite("CFS")
 features_df.to_csv('output.csv', index=False)
 
-for scheduler_name, scheduler_path in {'tickless': "/home/ubuntu/bin/scx_simple", "rustland": "/home/ubuntu/.cargo/bin/scx_rlfifo"}.items():
+for scheduler_name, scheduler_path in {'fifo': "/home/ubuntu/bin/scx_simple", "rlfifo": "/home/ubuntu/.cargo/bin/scx_rlfifo"}.items():
     # --- Execute and Display ---
     scx_process = subprocess.Popen(["sudo", scheduler_path], start_new_session=True)
     try:
