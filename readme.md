@@ -27,7 +27,7 @@ Features (important ones for the readme are **bolded**):
 
 >**Aside**: Note I collected total delta (the total change throughout the experiment) and percent change to capture trends for all the features with the intention of removing unecessary features later on. Thus I have ommitted them in the features above. Also note, even features above might not be important, I just had a guess they might be useful.
 >
-> Additionally, this repo contains data where a lot of these values are 0. Certain values require certain workloads to be run. For example, if T_swap_used_avg is to not be 0, then stress-ng must be run with the params that overload memory and force disk swapping. Thus, if a column has 0 for data in this repo it just means the stress-ng params I used for the important examples in this readme did not involve the params required to see a non zero value in these columns.
+> Additionally, this repo contains data where a lot of these values are 0. Certain values require certain workloads to be run. For example, if T_swap_used_avg should not be 0, then stress-ng must be run with the params that overload memory and force disk swapping. Thus, if a column has 0 for data in this repo it just means the stress-ng params I used for the important examples in this readme did not involve the params required to see a non zero value in these columns.
 
 ## Special Tools and Libraries:
 - stress-ng: A library used to stress test machines with a variety of workloads including, cpu, io, memory, and disk stress tests.
