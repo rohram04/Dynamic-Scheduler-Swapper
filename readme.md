@@ -38,8 +38,8 @@ Features (important ones for the readme are **bolded**):
 ## ML model design: Classification?
 
 ### Idea 1:
-My original idea was to treat this as a classification problem. Based of the current system metrics scheduler A is the best Scheduler so switch to A.
-Began with the idea of creating a random set of workloads and running each scheduler on the random set. Then classified which scheduler was the best by how well it performed based on the following cost function with turnaround time, response time, and coefficient of variation of fairness:
+My original idea was to treat this as a classification problem. Based off the current system metrics scheduler A is the best Scheduler so switch to scheduler A.
+I began with the idea of creating a random set of workloads and running each scheduler on the random set. Then I would classify which scheduler was the best by how well it performed based on the following cost function with turnaround time, response time, and coefficient of variation of fairness:
     
 $ L = TAT_{avg} + RT_{avg} + CV Fairness_{avg} $
 
@@ -47,7 +47,7 @@ The best scheduler has the lowest cost
 
 #### What are the issues with this idea?
 
-- There set of possible workloads is HUGE. It was becoming difficult for me to even imagine how to capture a large portion of this set especially with stress-ng. A classification model wouldn't generalize well to this set.
+- The set of possible workloads is HUGE. It was becoming difficult for me to even imagine how to capture a large portion of this set especially with stress-ng. A classification model wouldn't generalize well to this set.
 - The second point is I am optimizing for a cost function and then labeling a classifier based off the cost (...hint that this isn't a classification problem it's an optimization problem)
 
 ### If classification isn't right then what is? Idea 2:
@@ -64,8 +64,7 @@ $CE = \sum_{i} L_i \cdot \log a_i$
 
 The agent would then explore the action space using an Epsilon-Greedy approach (ideally [Upper Confidence Bound Algorithm](https://www.turing.com/kb/guide-on-upper-confidence-bound-algorithm-in-reinforced-learning) but did not have time for that). 
 
-An epsilon greedy approach is a function that determines whether the algorithm should choose the optimal choice based off it's current training (argmax $a_i$) or whether it should choose some other policy (random)
-to explore the action space (could there be a better action). The probability that it chooses a random policy is usually something low ~ 1/sqrt(n)
+An epsilon greedy approach is a function that determines whether the algorithm should choose the optimal scheduler based off it's current training (argmax $a_i$) or whether it should choose some other policy (random) to explore the action space. It's answering the question "Could there be a better action than the one I believe is optimal?". The probability that it chooses a random policy is usually something low ~ 1/sqrt(n)
 
 ![Epsilon Greedy function](/epsilongreedy.png)
 
