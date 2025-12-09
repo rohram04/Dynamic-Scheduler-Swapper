@@ -41,7 +41,7 @@ Features (important ones for the readme are **bolded**):
 My original idea was to treat this as a classification problem. Based of the current system metrics scheduler A is the best Scheduler so switch to A.
 Began with the idea of creating a random set of workloads and running each scheduler on the random set. Then classified which scheduler was the best by how well it performed based on the following cost function with turnaround time, response time, and coefficient of variance of fairness:
     
-$L = (TAT)_{avg} + (RT)_{avg} + (CV Fairness)_{avg}$
+$ L = TAT_{avg} + RT_{avg} + (CV Fairness)_{avg} $
 
 The best scheduler has the lowest cost
 
