@@ -202,7 +202,7 @@ And the metrics? They were better but still not meaningful
 
 Comparing this to the metrics above for the VM:
 
-- The coefficient of variation, in general, has decreased; Specifically, Average Turnaround Time coefficietn of variation has decreased. However it's interesting that the turnaround time on bare metal is ~5s while on the VM its < 1s. (see aside below)
+- The coefficient of variation, in general, has decreased; Specifically, Average Turnaround Time coefficient of variation has decreased. However it's interesting that the turnaround time on bare metal is ~5s while on the VM its < 1s. (see aside below)
 - The normalized mean for context switches is far less on bare metal than on the VM. This supports the earlier guess that the Host is pre-empting/interupting the VM to a great extent resulting in skewed metrics*
 
 > **Aside**: Looking into this further. I found that the VM had ~90 different processes that completed (~20 of which had ~5s turnaround time, these are the stress-ng processes) of which ~70 were super short turnaround time. This is much more than the 20 processes completed on bare metal for the same experiment. This explains why the context switches were much higher on the VM than the bare metal and why the turnaround time was much lower on the VM. It must be the VM switching to the Host, time slicing amongst cores, etc. See the data below - you can observe the lower turnaround times at the bottom:
