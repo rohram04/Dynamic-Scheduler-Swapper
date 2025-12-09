@@ -31,7 +31,7 @@ Features (important ones for the readme are **bolded**):
 
 ## Special Tools and Libraries:
 - stress-ng: A library used to stress test machines with a variety of workloads including, cpu, io, memory, and disk stress tests.
-- sched_ext: "sched_ext is a Linux kernel feature which enables implementing kernel thread schedulers in BPF and dynamically loading them.It contains a variety scheduler implementations the two I cared about were: 
+- sched_ext: "sched_ext is a Linux kernel feature which enables implementing kernel thread schedulers in BPF and dynamically loading them." It contains a variety scheduler implementations the two I cared about were: 
     - scx_simple (fifo scheduler written in c)
     - scx_bpfland (a low latency scheduler good for gaming, audio streaming, etc)
 
